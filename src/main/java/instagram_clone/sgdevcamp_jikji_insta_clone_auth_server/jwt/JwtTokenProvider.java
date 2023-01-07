@@ -82,7 +82,7 @@ public class JwtTokenProvider {
 		return request.getHeader("Authorization");
 	}
 
-	public boolean validateToken(String jwtToken) {
+	public boolean validateAccessToken(String jwtToken) {
 		try {
 			Jws<Claims> claimsJws = parser().setSigningKey(secretKey).parseClaimsJws(jwtToken);
 			return !claimsJws.getBody().getExpiration().before(new Date());

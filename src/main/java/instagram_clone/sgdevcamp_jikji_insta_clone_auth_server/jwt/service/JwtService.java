@@ -1,6 +1,7 @@
 package instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.jwt.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -25,6 +26,10 @@ public class JwtService {
 		this.refreshTokenRepository = refreshTokenRepository;
 	}
 
+	public TokenInfoDto createToken(String userEmail, List<String> roles){
+		return jwtTokenProvider.createToken(userEmail,roles);
+	}
+
 	@Transactional
 	public void login(TokenInfoDto tokenDto){
 		RefreshToken refreshToken = RefreshToken.builder().userEmail(tokenDto.getUserEmail()).refreshToken(
@@ -47,9 +52,14 @@ public class JwtService {
 		return createdRefreshJson(createdAccessToken);
 	}
 
-	public String getAdmin(String accessToken){
+	public Boolean validatedAccessToken(String accessToken){
+		return jwtTokenProvider.validateAccessToken(accessToken);
+	}
+
+	public String getRoles(String accessToken){
 		return jwtTokenProvider.getRoles(accessToken);
 	}
+
 	public Map<String, String> createdRefreshJson(String createdAccessToken){
 		Map<String, String> map = new HashMap<>();
 		if(createdAccessToken == null){
@@ -64,5 +74,13 @@ public class JwtService {
 		map.put("accessToken",createdAccessToken);
 
 		return map;
+	}
+
+	public void removeRefreshTokenByUserEmail(String userEmail){
+		refreshTokenRepository.deleteByUserEmail(userEmail);
+	}
+
+	public Boolean checkRefreshTokenByUserEmail(String userEmail){
+		return  refreshTokenRepository.existsByUserEmail(userEmail);
 	}
 }
