@@ -6,6 +6,7 @@ CREATE TABLE user
     nickname     varchar(20)  not null,
     phone_number varchar(20)  not null,
     email_auth   boolean      not null default 0,
+    user_profile_img varchar(250) not null,
     created_time datetime     not null
 );
 
