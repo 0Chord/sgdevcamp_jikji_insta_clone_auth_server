@@ -45,13 +45,13 @@ public class MailService {
 	public MimeMessage createMailForm(String email) throws MessagingException, UnsupportedEncodingException{
 		createCode();
 		String setFrom = "smilestagram.clone@gmail.com";
-		String title = "Smilestagram 회원가입 인증 번호";
+		String title = authCode + "is your Smilestagram code";
 
 		MimeMessage message = mailSender.createMimeMessage();
 		message.addRecipients(MimeMessage.RecipientType.TO,email);
 		message.setSubject(title);
 		message.setFrom(setFrom);
-		message.setText(setContext(authCode),"utf-8","html");
+		message.setText(setContext(email,authCode),"utf-8","html");
 
 		return message;
 	}
@@ -63,8 +63,9 @@ public class MailService {
 		return authCode;
 	}
 
-	public String setContext(String code){
+	public String setContext(String email,String code){
 		Context context = new Context();
+		context.setVariable("email",email);
 		context.setVariable("code",code);
 		return templateEngine.process("mail",context);
 	}
