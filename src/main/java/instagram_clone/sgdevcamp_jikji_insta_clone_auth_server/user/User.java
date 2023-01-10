@@ -1,5 +1,6 @@
 package instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,13 +37,25 @@ public class User implements UserDetails {
 	private String email;
 	private String password;
 	private String nickname;
-	@Column(name = "phone_number")
 	private String phone;
-	@Column(name = "email_auth")
-	private Boolean emailAuth;
+	private Boolean status;
+	@Column(name = "created_at")
+	private Date createAt;
+	@Column(name = "updated_at")
+	private Date updateAt;
+	@Column(name = "login_at")
+	private LocalDate loginAt;
 
-	public void updateEmailAuth(Boolean emailAuth) {
-		this.emailAuth = emailAuth;
+	public void updateUpdatedAt(Date updateAt){
+		this.updateAt = updateAt;
+	}
+
+	public void updateLoginAt(LocalDate loginAt){
+		this.loginAt = loginAt;
+	}
+
+	public void updateEmailAuth(Boolean status) {
+		this.status = status;
 	}
 
 	public void updatePassword(String password) {
