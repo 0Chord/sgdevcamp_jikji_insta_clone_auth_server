@@ -40,11 +40,11 @@ public class UserController {
 		} else if (!encoder.matches(password, user.getPassword())) {
 			//비밀번호가 일치하지 않는다. 에러 추가 예정
 			return null;
-		} else {
-			TokenInfoDto token = jwtService.createToken(userEmail, user.getRoles());
-			jwtService.login(token);
-			//클라이언트 쿠키 로직 추가
-			return null;
 		}
+		TokenInfoDto token = jwtService.createToken(userEmail, user.getRoles());
+		jwtService.login(token);
+		userService.updateLoginAt(userEmail);
+		//클라이언트 쿠키 로직 추가
+		return null;
 	}
 }
