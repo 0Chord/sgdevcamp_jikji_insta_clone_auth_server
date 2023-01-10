@@ -1,5 +1,6 @@
 package instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -42,5 +43,10 @@ public class UserService {
 		User user = userRepository.findByEmail(userEmail).get();
 		String securePassword = encoder.encode(password);
 		user.updatePassword(securePassword);
+	}
+	@Transactional
+	public void updateLoginAt(String userEmail){
+		User user = userRepository.findByEmail(userEmail).get();
+		user.updateLoginAt(LocalDate.now());
 	}
 }
