@@ -27,7 +27,12 @@ public class SecurityConfig{
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			.and()
 			.authorizeHttpRequests()
-			.antMatchers("/").permitAll()
+			.antMatchers("/home").permitAll()
+			.antMatchers("/swagger-ui/**").permitAll()
+			.antMatchers("/v2/api-docs/**").permitAll()
+			.antMatchers("/swagger-resources/**").permitAll()
+			.antMatchers("/user/**").permitAll()
+			.antMatchers("/signup/**").permitAll()
 			.anyRequest().authenticated()
 			.and()
 			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
