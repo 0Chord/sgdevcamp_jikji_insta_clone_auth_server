@@ -2,21 +2,21 @@ package instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 import javax.mail.MessagingException;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.mail.MailAuth;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.mail.dto.MailAuthDto;
@@ -28,7 +28,7 @@ import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.service.User
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Controller
+@RestController
 @RequestMapping("/signup")
 public class SignupController {
 	UserService userService;
@@ -45,44 +45,47 @@ public class SignupController {
 		this.mailAuthService = mailAuthService;
 	}
 
-	@PostMapping("/enroll")
-	public String enroll(@Validated UserDto userForm, BindingResult bindingResult) throws
+	@PostMapping("/register")
+	public String enroll(@RequestBody Map<String, String> userForm, BindingResult bindingResult) throws
 		MessagingException,
 		UnsupportedEncodingException {
-		User userByName = userService.findByEmail(userForm.getEmail());
-		User userByNickname = userService.findByNickname(userForm.getNickname());
+		System.out.println("userForm = " + userForm);
+		User userByName = userService.findByEmail(userForm.get("email"));
+		User userByNickname = userService.findByNickname(userForm.get("nickname"));
 		if (userByName != null) {
 			bindingResult.reject("등록된 사용자가 있습니다.");
 			return null;
 		} else if (userByNickname != null) {
 			bindingResult.reject("등록된 닉네임을 사용하는 사용자가 있습니다.");
 			return null;
-		} else if (!Pattern.matches(emailRegex, userForm.getEmail())) {
+		} else if (!Pattern.matches(emailRegex, userForm.get("email"))) {
 			bindingResult.reject("이메일 형식이 잘못되었습니다.");
 			return null;
-		} else if (!Pattern.matches(phoneRegex, userForm.getPhone())) {
+		} else if (!Pattern.matches(phoneRegex, userForm.get("phone"))) {
 			bindingResult.reject("전화번호 형식이 잘못되었습니다.");
 			return null;
-		} else if (!Pattern.matches(passwordRegex, userForm.getPassword())) {
+		} else if (!Pattern.matches(passwordRegex, userForm.get("password"))) {
 			bindingResult.reject("비밀번호 형식이 잘못되었습니다.");
 			return null;
 		}
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-		String securePassword = encoder.encode(userForm.getPassword());
-		User user = User.builder().email(userForm.getEmail())
+		String securePassword = encoder.encode(userForm.get("password"));
+		User user = User.builder().email(userForm.get("email"))
 			.password(securePassword)
-			.phone(userForm.getPhone())
+			.name(userForm.get("name"))
+			.phone(userForm.get("phone"))
 			.roles(Collections.singletonList("ROLE_USER"))
 			.loginAt(LocalDate.now())
+			.status(false)
 			.updateAt(new Date())
 			.createAt(new Date())
-			.nickname(userForm.getNickname()).build();
+			.nickname(userForm.get("nickname")).build();
 		userService.register(user);
 		String code = mailService.sendMail(user.getEmail());
 		MailAuth mailAuth = MailAuth.builder().email(user.getEmail()).code(code).build();
 		mailAuthService.register(mailAuth);
 
-		return null;
+		return user.getEmail();
 	}
 
 	@PostMapping("/mailAuth")
@@ -99,7 +102,7 @@ public class SignupController {
 		userService.updateEmailAuth(mailAuth.getEmail());
 		mailAuthService.deleteByEmail(mailAuth.getEmail());
 		log.info("코드가 같다.");
-		
+
 		return null;
 	}
 
