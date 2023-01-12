@@ -13,11 +13,14 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 @Service
-@AllArgsConstructor
-@NoArgsConstructor
 public class UserService {
+
 	UserRepository userRepository;
 	BCryptPasswordEncoder encoder;
+
+	public UserService(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
 
 	public void register(User user){
 		userRepository.save(user);
