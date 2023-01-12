@@ -5,6 +5,7 @@ CREATE TABLE user
     password     varchar(100) not null,
     nickname     varchar(20)  not null,
     phone        varchar(20)  not null,
+    name         varchar(10)  not null,
     status       boolean      not null default 0,
     user_profile varchar(250) not null,
     created_at   datetime     not null,

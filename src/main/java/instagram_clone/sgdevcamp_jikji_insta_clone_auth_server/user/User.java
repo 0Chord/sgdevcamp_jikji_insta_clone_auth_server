@@ -36,6 +36,7 @@ public class User implements UserDetails {
 	private Integer id;
 	private String email;
 	private String password;
+	private String name;
 	private String nickname;
 	private String phone;
 	private Boolean status;
@@ -46,11 +47,11 @@ public class User implements UserDetails {
 	@Column(name = "login_at")
 	private LocalDate loginAt;
 
-	public void updateUpdatedAt(Date updateAt){
+	public void updateUpdatedAt(Date updateAt) {
 		this.updateAt = updateAt;
 	}
 
-	public void updateLoginAt(LocalDate loginAt){
+	public void updateLoginAt(LocalDate loginAt) {
 		this.loginAt = loginAt;
 	}
 
