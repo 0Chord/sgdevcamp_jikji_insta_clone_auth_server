@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@NoArgsConstructor
 @Data
 public class MailAuthDto {
 	private String email;
