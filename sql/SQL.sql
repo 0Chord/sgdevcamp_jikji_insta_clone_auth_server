@@ -7,7 +7,7 @@ CREATE TABLE user
     phone        varchar(20)  not null,
     name         varchar(10)  not null,
     status       boolean      not null default 0,
-    user_profile varchar(250) not null,
+    user_profile varchar(250),
     created_at   datetime     not null,
     updated_at   datetime     not null,
     login_at     datetime null
@@ -15,8 +15,8 @@ CREATE TABLE user
 
 CREATE TABLE user_roles
 (
-    email varchar(100) not null,
-    roles varchar(20)  not null
+    email varchar(100),
+    roles varchar(20)
 );
 
 CREATE TABLE mail_auth
