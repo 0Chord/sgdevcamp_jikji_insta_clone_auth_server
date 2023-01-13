@@ -33,6 +33,7 @@ public class SecurityConfig{
 			.antMatchers("/swagger-resources/**").permitAll()
 			.antMatchers("/user/**").permitAll()
 			.antMatchers("/signup/**").permitAll()
+			.antMatchers("/searchPassword/**").permitAll()
 			.anyRequest().authenticated()
 			.and()
 			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
