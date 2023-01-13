@@ -15,7 +15,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -26,9 +25,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
 @Builder
 public class User implements UserDetails {
 	@Id
@@ -39,19 +38,22 @@ public class User implements UserDetails {
 	private String name;
 	private String nickname;
 	private String phone;
+	@Column(name="user_profile")
+	private String profile;
 	private Boolean status;
 	@Column(name = "created_at")
-	private Date createAt;
+	private LocalDateTime createAt;
 	@Column(name = "updated_at")
-	private Date updateAt;
+	private LocalDateTime updateAt;
 	@Column(name = "login_at")
-	private LocalDate loginAt;
+	private LocalDateTime loginAt;
 
-	public void updateUpdatedAt(Date updateAt) {
+
+	public void updateUpdatedAt(LocalDateTime updateAt) {
 		this.updateAt = updateAt;
 	}
 
-	public void updateLoginAt(LocalDate loginAt) {
+	public void updateLoginAt(LocalDateTime loginAt) {
 		this.loginAt = loginAt;
 	}
 
