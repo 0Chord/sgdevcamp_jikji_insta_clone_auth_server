@@ -1,20 +1,16 @@
 package instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.User;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class UserService {
 
 	UserRepository userRepository;
@@ -49,9 +45,17 @@ public class UserService {
 		String securePassword = encoder.encode(password);
 		user.updatePassword(securePassword);
 	}
+
 	@Transactional
 	public void updateLoginAt(String userEmail){
 		User user = userRepository.findByEmail(userEmail).get();
 		user.updateLoginAt(LocalDateTime.now());
+	}
+
+	@Transactional
+	public void updateUpdateAt(String userEmail){
+		User user = userRepository.findByEmail(userEmail).get();
+		log.info(userEmail+" 임시비밀번호 발급");
+		user.updateUpdatedAt(LocalDateTime.now());
 	}
 }
