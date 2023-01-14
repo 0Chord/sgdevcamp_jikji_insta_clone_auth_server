@@ -20,12 +20,17 @@ import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.mail.service.Mail
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.User;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.dto.UserAuthDto;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.service.UserService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
+@Api(tags = "비밀번호 찾기 관련 컨트롤러")
 @RequestMapping("/searchPassword")
 public class SearchPasswordController {
 
@@ -37,14 +42,15 @@ public class SearchPasswordController {
 		this.mailService = mailService;
 	}
 
+	@Operation(summary = "비밀번호 찾기", description = "회원정보를 통해 인증 완료 시 임시비밀번호 발급")
+	@ApiResponse(code = 200, message = "OK")
 	@PostMapping("/authUser")
-	public ResponseEntity<?> authUser(@RequestBody UserAuthDto body) throws
+	public ResponseEntity<?> authUser(@RequestBody @ApiParam(value = "회원 정보") UserAuthDto body) throws
 		MessagingException,
 		UnsupportedEncodingException {
 		String userEmail = body.getEmail();
 		String nickname = body.getNickname();
 		String phone = body.getPhone();
-		System.out.println("body = " + body);
 		User user = userService.findByEmail(userEmail);
 		if(user == null){
 			return new ResponseEntity<>("NotExistsUser", HttpStatus.OK);
@@ -55,6 +61,7 @@ public class SearchPasswordController {
 		}
 
 		String newPassword = mailService.sendMail(userEmail,"password");
+		userService.updateUpdateAt(userEmail);
 		userService.updatePassword(userEmail,newPassword);
 		return new ResponseEntity<>("SUCCESS",HttpStatus.OK);
 	}

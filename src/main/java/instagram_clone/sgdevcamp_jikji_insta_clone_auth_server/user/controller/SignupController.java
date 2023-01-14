@@ -1,10 +1,8 @@
 package instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.controller;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -25,10 +23,15 @@ import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.mail.service.Mail
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.User;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.dto.UserDto;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.service.UserService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
+@Api(tags = "회원가입 관련 컨트롤러")
 @RequestMapping("/signup")
 public class SignupController {
 	UserService userService;
@@ -46,9 +49,10 @@ public class SignupController {
 		this.mailService = mailService;
 		this.mailAuthService = mailAuthService;
 	}
-
+	@Operation(summary = "회원가입", description = "회원 정보 인증 통과 시 회원가입")
+	@ApiResponse(code = 200, message = "OK")
 	@PostMapping("/register")
-	public ResponseEntity<?> enroll(@RequestBody UserDto userForm) throws
+	public ResponseEntity<?> enroll(@RequestBody @ApiParam(value = "회원가입 유저 정보") UserDto userForm) throws
 		MessagingException,
 		UnsupportedEncodingException {
 		User userByName = userService.findByEmail(userForm.getEmail());
@@ -81,16 +85,16 @@ public class SignupController {
 			.createAt(LocalDateTime.now())
 			.nickname(userForm.getNickname()).build();
 		userService.register(user);
-		String code = mailService.sendMail(user.getEmail(),"mail");
+		String code = mailService.sendMail(user.getEmail(), "mail");
 		MailAuth mailAuth = MailAuth.builder().email(user.getEmail()).code(code).build();
 		mailAuthService.register(mailAuth);
-
 		return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
 	}
 
+	@Operation(summary = "메일 인증", description = "메일 인증 통과 시 사이트 이용 권한 제공")
+	@ApiResponse(code = 200, message = "OK")
 	@PostMapping("/mailAuth")
-	public ResponseEntity<?> authMail(@RequestBody MailAuthDto mailAuthForm) {
-		System.out.println("mailAuthForm = " + mailAuthForm);
+	public ResponseEntity<?> authMail(@RequestBody @ApiParam(value = "메일인증 코드 정보") MailAuthDto mailAuthForm) {
 		MailAuth mailAuth = mailAuthService.findByEmail(mailAuthForm.getEmail());
 		if (mailAuth == null) {
 			return new ResponseEntity<>("NotExistsEmail", HttpStatus.OK);

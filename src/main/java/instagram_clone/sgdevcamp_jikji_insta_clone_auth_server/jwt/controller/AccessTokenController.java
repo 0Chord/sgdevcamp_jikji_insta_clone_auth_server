@@ -11,10 +11,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.jwt.service.JwtService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
+@Api(tags = "AccessToken 관련 컨트롤러")
 @RequestMapping("/accessToken")
 public class AccessTokenController {
 	JwtService jwtService;
@@ -22,9 +27,10 @@ public class AccessTokenController {
 	public AccessTokenController(JwtService jwtService) {
 		this.jwtService = jwtService;
 	}
-
+	@Operation(summary = "accessToken 검증", description = "accessToken 검증 API")
+	@ApiResponse(code = 200, message = "OK")
 	@PostMapping("/validateAccessToken")
-	public ResponseEntity<?> validateAccessToken(@RequestBody MultiValueMap<String, String> body){
+	public ResponseEntity<?> validateAccessToken(@RequestBody @ApiParam(value = "accessToken") MultiValueMap<String, String> body){
 		String accessToken = body.get("accessToken").get(0);
 		Boolean validatedAccessToken = jwtService.validatedAccessToken(accessToken);
 		if(validatedAccessToken){
@@ -34,8 +40,10 @@ public class AccessTokenController {
 		}
 	}
 
+	@Operation(summary = "유저 권한", description = "accessToken을 통해 유저 권한 전달 API")
+	@ApiResponse(code = 200, message = "OK")
 	@PostMapping("/getRoles")
-	public ResponseEntity<?> getRoles(@RequestBody MultiValueMap<String, String> body){
+	public ResponseEntity<?> getRoles(@RequestBody @ApiParam(value = "accessToken") MultiValueMap<String, String> body){
 		String accessToken = body.get("accessToken").get(0);
 		String roles = jwtService.getRoles(accessToken);
 		return new ResponseEntity<>(roles,HttpStatus.OK);
