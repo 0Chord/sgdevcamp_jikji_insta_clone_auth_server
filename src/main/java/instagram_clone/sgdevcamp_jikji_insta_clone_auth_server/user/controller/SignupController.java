@@ -3,6 +3,7 @@ package instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.controller;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -49,12 +50,11 @@ public class SignupController {
 		this.mailService = mailService;
 		this.mailAuthService = mailAuthService;
 	}
+
 	@Operation(summary = "회원가입", description = "회원 정보 인증 통과 시 회원가입")
 	@ApiResponse(code = 200, message = "OK")
 	@PostMapping("/register")
-	public ResponseEntity<?> enroll(@RequestBody @ApiParam(value = "회원가입 유저 정보") UserDto userForm) throws
-		MessagingException,
-		UnsupportedEncodingException {
+	public ResponseEntity<?> enroll(@RequestBody @ApiParam(value = "회원가입 유저 정보") UserDto userForm) {
 		User userByName = userService.findByEmail(userForm.getEmail());
 		User userByNickname = userService.findByNickname(userForm.getNickname());
 		if (userByName != null) {
@@ -72,7 +72,6 @@ public class SignupController {
 		}
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 		String securePassword = encoder.encode(userForm.getPassword());
-		System.out.println("userForm = " + userForm.getPassword()+"    "+securePassword);
 		User user = User.builder().email(userForm.getEmail())
 			.password(securePassword)
 			.name(userForm.getName())
@@ -85,10 +84,19 @@ public class SignupController {
 			.createAt(LocalDateTime.now())
 			.nickname(userForm.getNickname()).build();
 		userService.register(user);
-		String code = mailService.sendMail(user.getEmail(), "mail");
-		MailAuth mailAuth = MailAuth.builder().email(user.getEmail()).code(code).build();
-		mailAuthService.register(mailAuth);
 		return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+	}
+
+	@Operation(summary = "인증메일 전달", description = "인증 메일 전달")
+	@ApiResponse(code = 200, message = "OK")
+	@PostMapping("/sendMail")
+	public void sendMail(@RequestBody @ApiParam(value = "전송할 유저 메일") Map<String, String> body) throws
+		MessagingException,
+		UnsupportedEncodingException {
+		String email = body.get("email");
+		String code = mailService.sendMail(email, "mail");
+		MailAuth mailAuth = MailAuth.builder().email(email).code(code).build();
+		mailAuthService.register(mailAuth);
 	}
 
 	@Operation(summary = "메일 인증", description = "메일 인증 통과 시 사이트 이용 권한 제공")
