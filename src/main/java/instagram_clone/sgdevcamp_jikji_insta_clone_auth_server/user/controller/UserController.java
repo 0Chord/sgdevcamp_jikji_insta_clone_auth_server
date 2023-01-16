@@ -61,12 +61,9 @@ public class UserController {
 		jwtService.login(token);
 		userService.updateLoginAt(userEmail);
 		//클라이언트 쿠키 로직 추가
-		Cookie accessCookie = cookieService.setAccessCookie(token.getAccessToken());
 		Cookie refreshCookie = cookieService.setRefreshCookie(token.getRefreshToken());
-
-		httpServletResponse.addCookie(accessCookie);
 		httpServletResponse.addCookie(refreshCookie);
-		return new ResponseEntity<>("SUCCESS_LOGIN", HttpStatus.OK);
+		return new ResponseEntity<>(token.getAccessToken(), HttpStatus.OK);
 	}
 
 	@Operation(summary = "유저정보 요청", description = "유저정보 요청 시 유저정보 전달")
