@@ -58,4 +58,10 @@ public class UserService {
 		log.info(userEmail+" 임시비밀번호 발급");
 		user.updateUpdatedAt(LocalDateTime.now());
 	}
+
+	@Transactional
+	public void updateNickname(String userEmail, String nickname){
+		User user = userRepository.findByEmail(userEmail).get();
+		user.updateNickname(nickname);
+	}
 }
