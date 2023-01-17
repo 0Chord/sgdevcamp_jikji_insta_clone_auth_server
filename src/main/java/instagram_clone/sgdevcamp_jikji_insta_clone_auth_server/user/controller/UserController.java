@@ -1,5 +1,7 @@
 package instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.controller;
 
+import java.util.regex.Pattern;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
@@ -18,6 +20,7 @@ import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.User;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.dao.UserInfoDao;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.dto.GetUserInfoDto;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.dto.LoginDto;
+import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.dto.UpdateUserInfoDto;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
@@ -35,6 +38,10 @@ public class UserController {
 	JwtService jwtService;
 	CookieService cookieService;
 
+	private static final String phoneRegex = "^01(?:0|1|[6-9])(?:\\d{3}|\\d{4})\\d{4}$";
+	private static final String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,20}$";
+
+	private static final String nicknameRegex = "^(?=.*[a-zA-Z0-9가-힣])[a-zA-Z0-9가-힣]{2,16}$";
 	public UserController(UserService userService, JwtService jwtService, CookieService cookieService) {
 		this.userService = userService;
 		this.jwtService = jwtService;
@@ -68,7 +75,7 @@ public class UserController {
 
 	@Operation(summary = "유저정보 요청", description = "유저정보 요청 시 유저정보 전달")
 	@ApiResponse(code = 200, message = "OK")
-	@PostMapping("/get-user-info")
+	@PostMapping("/user-info")
 	public ResponseEntity<?> getUserInfo(@RequestBody @ApiParam(value = "유저정보 Dto") GetUserInfoDto body) {
 		String userEmail = body.getEmail();
 		User user = userService.findByEmail(userEmail);
@@ -83,5 +90,27 @@ public class UserController {
 			.build();
 
 		return new ResponseEntity<>(userInfoDao, HttpStatus.OK);
+	}
+
+	@Operation(summary = "유저정보 변경", description = "유저정보 변경 요청 시 유저정보 변경")
+	@ApiResponse(code=200, message="OK")
+	@PostMapping("/update-info")
+	public ResponseEntity<?> updateUserInfo(@RequestBody @ApiParam(value = "변경 요청 정보 Dto")UpdateUserInfoDto body){
+		String email = body.getEmail();
+		String nickname = body.getNickname();
+		String password = body.getPassword();
+		User userByNickname = userService.findByNickname(nickname);
+		if(userByNickname!=null){
+			return new ResponseEntity<>("ExistsUserNickname",HttpStatus.OK);
+		}else if(!Pattern.matches(nicknameRegex,nickname)){
+			return new ResponseEntity<>("WrongNicknameFormat",HttpStatus.OK);
+		}else if(!Pattern.matches(passwordRegex,password)){
+			return new ResponseEntity<>("WrongPasswordFormat",HttpStatus.OK);
+		}
+		userService.updateUpdateAt(email);
+		userService.updateNickname(email,nickname);
+		userService.updatePassword(email,password);
+
+		return new ResponseEntity<>("SUCCESS",HttpStatus.OK);
 	}
 }
