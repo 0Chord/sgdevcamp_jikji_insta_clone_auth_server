@@ -65,6 +65,8 @@ public class User implements UserDetails {
 		this.password = password;
 	}
 
+	public void updateNickname(String nickname){ this.nickname = nickname;}
+
 	@ElementCollection(fetch = FetchType.EAGER)
 	@Builder.Default
 	private List<String> roles = new ArrayList<>();
