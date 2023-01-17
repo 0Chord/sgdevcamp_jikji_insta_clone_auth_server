@@ -31,7 +31,7 @@ public class RefreshTokenController {
 
 	@Operation(summary = "RefreshToken 검증", description = "RefreshToken 검증을 통해 AccessToken 발급 API")
 	@ApiResponse(code = 200, message = "OK")
-	@PostMapping("/validateRefreshToken")
+	@PostMapping("/validation")
 	public ResponseEntity<?> validateRefreshToken(@RequestBody @ApiParam(value = "refreshToken") MultiValueMap<String, String> body){
 		log.info("refreshToken Controller  Refresh Token 검증 실행");
 		Map<String, String> map = jwtService.validatedRefreshToken(body.get("refreshToken").get(0));
@@ -48,7 +48,7 @@ public class RefreshTokenController {
 
 	@Operation(summary = "RefreshToken 삭제", description = "RefreshToken 삭제 API")
 	@ApiResponse(code = 200, message = "OK")
-	@PostMapping("/deleteRefreshToken")
+	@PostMapping("/remove")
 	public ResponseEntity<?> deleteRefreshToken(@RequestBody @ApiParam(value = "userEmail") MultiValueMap<String, String> body){
 		String userEmail = body.get("userEmail").get(0);
 		if(jwtService.checkRefreshTokenByUserEmail(userEmail)){
