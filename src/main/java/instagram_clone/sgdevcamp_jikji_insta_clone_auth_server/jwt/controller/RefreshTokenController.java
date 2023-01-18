@@ -2,9 +2,13 @@ package instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.jwt.controller;
 
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,12 +35,15 @@ public class RefreshTokenController {
 
 	@Operation(summary = "RefreshToken 검증", description = "RefreshToken 검증을 통해 AccessToken 발급 API")
 	@ApiResponse(code = 200, message = "OK")
-	@PostMapping("/validation")
-	public ResponseEntity<?> validateRefreshToken(@RequestBody @ApiParam(value = "refreshToken") MultiValueMap<String, String> body){
+	@GetMapping("/validation")
+	public ResponseEntity<?> validateRefreshToken(@ApiParam(value = "refreshToken") HttpServletRequest request) {
 		log.info("refreshToken Controller  Refresh Token 검증 실행");
-		Map<String, String> map = jwtService.validatedRefreshToken(body.get("refreshToken").get(0));
 
-		if(map.get("status").equals("402")){
+		String authorization = request.getHeader("Authorization");
+		String refreshToken = authorization.split(" ")[1];
+		Map<String, String> map = jwtService.validatedRefreshToken(refreshToken);
+
+		if (map.get("status").equals("402")) {
 			log.info("Refresh Token 기한 만료");
 			return new ResponseEntity<>("ExpiredRefreshToken", HttpStatus.UNAUTHORIZED);
 		}
@@ -49,13 +56,14 @@ public class RefreshTokenController {
 	@Operation(summary = "RefreshToken 삭제", description = "RefreshToken 삭제 API")
 	@ApiResponse(code = 200, message = "OK")
 	@PostMapping("/remove")
-	public ResponseEntity<?> deleteRefreshToken(@RequestBody @ApiParam(value = "userEmail") MultiValueMap<String, String> body){
+	public ResponseEntity<?> deleteRefreshToken(
+		@RequestBody @ApiParam(value = "userEmail") MultiValueMap<String, String> body) {
 		String userEmail = body.get("userEmail").get(0);
-		if(jwtService.checkRefreshTokenByUserEmail(userEmail)){
+		if (jwtService.checkRefreshTokenByUserEmail(userEmail)) {
 			jwtService.removeRefreshTokenByUserEmail(userEmail);
-			return new ResponseEntity<>("SUCCESS",HttpStatus.OK);
-		}else{
-			return new ResponseEntity<>("NotFoundUserEmail",HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>("NotFoundUserEmail", HttpStatus.BAD_REQUEST);
 		}
 	}
 
