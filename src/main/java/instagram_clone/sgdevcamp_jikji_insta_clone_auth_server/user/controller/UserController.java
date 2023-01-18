@@ -1,5 +1,6 @@
 package instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.controller;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.Cookie;
@@ -8,13 +9,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.jwt.dto.TokenInfoDto;
-import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.jwt.service.CookieService;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.jwt.service.JwtService;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.User;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.dao.UserInfoDao;
@@ -36,16 +37,14 @@ public class UserController {
 
 	UserService userService;
 	JwtService jwtService;
-	CookieService cookieService;
 
 	private static final String phoneRegex = "^01(?:0|1|[6-9])(?:\\d{3}|\\d{4})\\d{4}$";
 	private static final String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,20}$";
 
 	private static final String nicknameRegex = "^(?=.*[a-zA-Z0-9가-힣])[a-zA-Z0-9가-힣]{2,16}$";
-	public UserController(UserService userService, JwtService jwtService, CookieService cookieService) {
+	public UserController(UserService userService, JwtService jwtService) {
 		this.userService = userService;
 		this.jwtService = jwtService;
-		this.cookieService = cookieService;
 	}
 
 	@Operation(summary = "로그인", description = "로그인 요청 시 JWT 클라이언트에 쿠키로 발급")
@@ -68,9 +67,8 @@ public class UserController {
 		jwtService.login(token);
 		userService.updateLoginAt(userEmail);
 		//클라이언트 쿠키 로직 추가
-		Cookie refreshCookie = cookieService.setRefreshCookie(token.getRefreshToken());
-		httpServletResponse.addCookie(refreshCookie);
-		return new ResponseEntity<>(token.getAccessToken(), HttpStatus.OK);
+
+		return new ResponseEntity<>(token, HttpStatus.OK);
 	}
 
 	@Operation(summary = "유저정보 요청", description = "유저정보 요청 시 유저정보 전달")
@@ -113,4 +111,5 @@ public class UserController {
 
 		return new ResponseEntity<>("SUCCESS",HttpStatus.OK);
 	}
+
 }
