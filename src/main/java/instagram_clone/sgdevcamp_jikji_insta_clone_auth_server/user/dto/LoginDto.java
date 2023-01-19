@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class LoginDto {
 	@ApiModelProperty(value = "이메일")
 	private String email;
-
 	@ApiModelProperty(value = "비밀번호")
 	private String password;
+
 }
