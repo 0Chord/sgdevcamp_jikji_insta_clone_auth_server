@@ -60,6 +60,10 @@ public class JwtService {
 		return jwtTokenProvider.getRoles(accessToken);
 	}
 
+	public String getEmail(String accessToken){
+		return jwtTokenProvider.getUserPk(accessToken);
+	}
+
 	public Map<String, String> createdRefreshJson(String createdAccessToken) {
 		Map<String, String> map = new HashMap<>();
 		if (createdAccessToken == null) {
