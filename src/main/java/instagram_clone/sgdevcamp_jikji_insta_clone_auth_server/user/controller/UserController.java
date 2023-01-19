@@ -1,6 +1,7 @@
 package instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.controller;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.Cookie;
@@ -22,6 +23,7 @@ import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.dao.UserInfo
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.dto.GetUserInfoDto;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.dto.LoginDto;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.dto.UpdateUserInfoDto;
+import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.dto.UpdateUserPasswordDto;
 import instagram_clone.sgdevcamp_jikji_insta_clone_auth_server.user.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
@@ -38,27 +40,31 @@ public class UserController {
 	UserService userService;
 	JwtService jwtService;
 
+	BCryptPasswordEncoder bCryptPasswordEncoder;
+
 	private static final String phoneRegex = "^01(?:0|1|[6-9])(?:\\d{3}|\\d{4})\\d{4}$";
 	private static final String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,20}$";
 
 	private static final String nicknameRegex = "^(?=.*[a-zA-Z0-9가-힣])[a-zA-Z0-9가-힣]{2,16}$";
-	public UserController(UserService userService, JwtService jwtService) {
+
+	public UserController(UserService userService, JwtService jwtService, BCryptPasswordEncoder bCryptPasswordEncoder) {
 		this.userService = userService;
 		this.jwtService = jwtService;
+		this.bCryptPasswordEncoder = bCryptPasswordEncoder;
 	}
 
 	@Operation(summary = "로그인", description = "로그인 요청 시 JWT 클라이언트에 쿠키로 발급")
 	@ApiResponse(code = 200, message = "OK")
 	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody @ApiParam(value = "로그인 유저 정보") LoginDto body, @ApiParam(value = "쿠키전달") HttpServletResponse httpServletResponse) {
+	public ResponseEntity<?> login(@RequestBody @ApiParam(value = "로그인 유저 정보") LoginDto body,
+		@ApiParam(value = "쿠키전달") HttpServletResponse httpServletResponse) {
 		String userEmail = body.getEmail();
 		String password = body.getPassword();
 		User user = userService.findByEmail(userEmail);
-		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
 		if (user == null) {
 			return new ResponseEntity<>("NotFoundUser", HttpStatus.OK);
-		} else if (!encoder.matches(password, user.getPassword())) {
+		} else if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
 			return new ResponseEntity<>("WrongPassword", HttpStatus.OK);
 		} else if (!user.getStatus()) {
 			return new ResponseEntity<>("NotEmailAuthUser", HttpStatus.OK);
@@ -91,25 +97,44 @@ public class UserController {
 	}
 
 	@Operation(summary = "유저정보 변경", description = "유저정보 변경 요청 시 유저정보 변경")
-	@ApiResponse(code=200, message="OK")
+	@ApiResponse(code = 200, message = "OK")
 	@PostMapping("/update-info")
-	public ResponseEntity<?> updateUserInfo(@RequestBody @ApiParam(value = "변경 요청 정보 Dto")UpdateUserInfoDto body){
+	public ResponseEntity<?> updateUserInfo(@RequestBody @ApiParam(value = "변경 요청 정보 Dto") UpdateUserInfoDto body) {
 		String email = body.getEmail();
 		String nickname = body.getNickname();
-		String password = body.getPassword();
 		User userByNickname = userService.findByNickname(nickname);
-		if(userByNickname!=null){
-			return new ResponseEntity<>("ExistsUserNickname",HttpStatus.OK);
-		}else if(!Pattern.matches(nicknameRegex,nickname)){
-			return new ResponseEntity<>("WrongNicknameFormat",HttpStatus.OK);
-		}else if(!Pattern.matches(passwordRegex,password)){
-			return new ResponseEntity<>("WrongPasswordFormat",HttpStatus.OK);
+		if (userByNickname != null) {
+			return new ResponseEntity<>("ExistsUserNickname", HttpStatus.OK);
+		} else if (!Pattern.matches(nicknameRegex, nickname)) {
+			return new ResponseEntity<>("WrongNicknameFormat", HttpStatus.OK);
 		}
-		userService.updateUpdateAt(email);
-		userService.updateNickname(email,nickname);
-		userService.updatePassword(email,password);
 
-		return new ResponseEntity<>("SUCCESS",HttpStatus.OK);
+		userService.updateUpdateAt(email);
+		userService.updateNickname(email, nickname);
+
+		return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
 	}
 
+	@Operation(summary = "유저 비밀번호 변경", description = "유저 비밀번호 변경 API")
+	@ApiResponse(code = 200, message = "OK")
+	@PostMapping("/update-password")
+	public ResponseEntity<?> updateUserPassword(
+		@RequestBody @ApiParam(value = "비밀번호 변경 요청 Dto") UpdateUserPasswordDto body) {
+		String email = body.getEmail();
+		String password = body.getPassword();
+		String verifyPassword = body.getVerifyPassword();
+
+		User user = userService.findByEmail(email);
+		if (user == null) {
+			return new ResponseEntity<>("NotExistsUserEmail", HttpStatus.OK);
+		} else if (!Objects.equals(password, verifyPassword)) {
+			return new ResponseEntity<>("DifferentVerifyPassword", HttpStatus.OK);
+		} else if (!Pattern.matches(passwordRegex, password)) {
+			return new ResponseEntity<>("WrongPasswordFormat", HttpStatus.OK);
+		}
+		userService.updatePassword(email, password);
+		userService.updateUpdateAt(email);
+
+		return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+	}
 }
