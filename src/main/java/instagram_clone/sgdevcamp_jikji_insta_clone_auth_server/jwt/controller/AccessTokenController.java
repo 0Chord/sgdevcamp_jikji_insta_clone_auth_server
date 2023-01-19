@@ -47,12 +47,22 @@ public class AccessTokenController {
 
 	@Operation(summary = "유저 권한", description = "accessToken을 통해 유저 권한 전달 API")
 	@ApiResponse(code = 200, message = "OK")
-	@PostMapping("/getRoles")
+	@PostMapping("/get-roles")
 	public ResponseEntity<?> getRoles(
 		@RequestBody @ApiParam(value = "accessToken") HttpServletRequest request) {
 		String authorization = request.getHeader("Authorization");
 		String accessToken = authorization.split(" ")[1];
 		String roles = jwtService.getRoles(accessToken);
 		return new ResponseEntity<>(roles, HttpStatus.OK);
+	}
+
+	@Operation(summary = "유저 이메일", description = "accessToken을 통해 유저 이메일 전달 API")
+	@ApiResponse(code = 200, message = "0K")
+	@GetMapping("/get-email")
+	public ResponseEntity<?> getEmails(@ApiParam(value = "accessToken") HttpServletRequest request) {
+		String authorization = request.getHeader("Authorization");
+		String accessToken = authorization.split(" ")[1];
+		String email = jwtService.getEmail(accessToken);
+		return new ResponseEntity<>(email, HttpStatus.OK);
 	}
 }
