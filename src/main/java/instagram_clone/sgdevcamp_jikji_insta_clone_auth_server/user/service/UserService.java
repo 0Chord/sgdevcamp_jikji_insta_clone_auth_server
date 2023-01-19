@@ -14,9 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 public class UserService {
 
 	UserRepository userRepository;
+	BCryptPasswordEncoder bCryptPasswordEncoder;
 
-	public UserService(UserRepository userRepository) {
+	public UserService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
 		this.userRepository = userRepository;
+		this.bCryptPasswordEncoder = bCryptPasswordEncoder;
 	}
 
 	public void register(User user){
@@ -40,9 +42,8 @@ public class UserService {
 
 	@Transactional
 	public void updatePassword(String userEmail,String password){
-		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 		User user = userRepository.findByEmail(userEmail).get();
-		String securePassword = encoder.encode(password);
+		String securePassword = bCryptPasswordEncoder.encode(password);
 		user.updatePassword(securePassword);
 	}
 
@@ -55,7 +56,6 @@ public class UserService {
 	@Transactional
 	public void updateUpdateAt(String userEmail){
 		User user = userRepository.findByEmail(userEmail).get();
-		log.info(userEmail+" 임시비밀번호 발급");
 		user.updateUpdatedAt(LocalDateTime.now());
 	}
 

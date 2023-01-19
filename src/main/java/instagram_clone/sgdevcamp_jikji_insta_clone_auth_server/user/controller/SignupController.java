@@ -38,6 +38,7 @@ public class SignupController {
 	UserService userService;
 	MailService mailService;
 	MailAuthService mailAuthService;
+	BCryptPasswordEncoder bCryptPasswordEncoder;
 	private static final String emailRegex =
 		"^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 	private static final String phoneRegex = "^01(?:0|1|[6-9])(?:\\d{3}|\\d{4})\\d{4}$";
@@ -45,10 +46,12 @@ public class SignupController {
 
 	private static final String nicknameRegex = "^(?=.*[a-zA-Z0-9가-힣])[a-zA-Z0-9가-힣]{2,16}$";
 
-	public SignupController(UserService userService, MailService mailService, MailAuthService mailAuthService) {
+	public SignupController(UserService userService, MailService mailService, MailAuthService mailAuthService,
+		BCryptPasswordEncoder bCryptPasswordEncoder) {
 		this.userService = userService;
 		this.mailService = mailService;
 		this.mailAuthService = mailAuthService;
+		this.bCryptPasswordEncoder = bCryptPasswordEncoder;
 	}
 
 	@Operation(summary = "회원가입", description = "회원 정보 인증 통과 시 회원가입")
@@ -70,8 +73,7 @@ public class SignupController {
 		} else if (!Pattern.matches(nicknameRegex, userForm.getNickname())) {
 			return new ResponseEntity<>("WrongNicknameFormat", HttpStatus.OK);
 		}
-		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-		String securePassword = encoder.encode(userForm.getPassword());
+		String securePassword = bCryptPasswordEncoder.encode(userForm.getPassword());
 		User user = User.builder().email(userForm.getEmail())
 			.password(securePassword)
 			.name(userForm.getName())
