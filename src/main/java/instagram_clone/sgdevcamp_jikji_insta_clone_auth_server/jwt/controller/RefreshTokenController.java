@@ -52,19 +52,4 @@ public class RefreshTokenController {
 		String accessToken = map.get("accessToken");
 		return new ResponseEntity<>(accessToken, HttpStatus.OK);
 	}
-
-	@Operation(summary = "RefreshToken 삭제", description = "RefreshToken 삭제 API")
-	@ApiResponse(code = 200, message = "OK")
-	@PostMapping("/remove")
-	public ResponseEntity<?> deleteRefreshToken(
-		@RequestBody @ApiParam(value = "userEmail") MultiValueMap<String, String> body) {
-		String userEmail = body.get("userEmail").get(0);
-		if (jwtService.checkRefreshTokenByUserEmail(userEmail)) {
-			jwtService.removeRefreshTokenByUserEmail(userEmail);
-			return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>("NotFoundUserEmail", HttpStatus.BAD_REQUEST);
-		}
-	}
-
 }

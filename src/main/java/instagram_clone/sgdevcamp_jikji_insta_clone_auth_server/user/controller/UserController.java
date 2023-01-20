@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,9 +69,7 @@ public class UserController {
 			return new ResponseEntity<>("NotEmailAuthUser", HttpStatus.OK);
 		}
 		TokenInfoDto token = jwtService.createToken(userEmail, user.getRoles());
-		jwtService.login(token);
 		userService.updateLoginAt(userEmail);
-		//클라이언트 쿠키 로직 추가
 
 		return new ResponseEntity<>(token, HttpStatus.OK);
 	}

@@ -106,8 +106,7 @@ public class JwtTokenProvider {
 		return accessToken;
 	}
 
-	public String validateRefreshToken(RefreshToken refreshTokenObj){
-		String refreshToken = refreshTokenObj.getRefreshToken();
+	public String validateRefreshToken(String refreshToken){
 		try{
 			Jws<Claims> claims = parser().setSigningKey(secretKey).parseClaimsJws(refreshToken);
 
